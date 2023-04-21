@@ -21,7 +21,7 @@ val_data_prefix = 'valid/'  # Prefix of val image path
 
 classes=('crack','crack')
 
-train_batch_size_per_gpu = 6
+train_batch_size_per_gpu = 4
 train_num_workers = 4
 val_batch_size_per_gpu = 1
 val_num_workers = 2
@@ -29,6 +29,8 @@ val_num_workers = 2
 num_classes = len(classes)
 print(f"num_classes:{num_classes}")
 metainfo = dict(classes=classes, palette=[(20,40,80),(120,140,80)])
+custom_imports = dict(imports=['mmcls.models'], allow_failed_imports=False)
+pretrained = 'https://download.openmmlab.com/mmclassification/v0/repvgg/repvgg-A0_8xb32_in1k_20221213-60ae8e23.pth'
 # model settings
 model = dict(
     type='SOLOv2',
@@ -40,27 +42,36 @@ model = dict(
         pad_mask=True,
         pad_size_divisor=32),
     backbone=dict(
-        type='ResNet',
-        depth=50,
-        num_stages=4,
+        # _delete_=True, # Delete the backbone field in _base_
+        type='mmcls.RepVGG', # Using MobileNetV3 from mmcls
+        arch='A0',
         out_indices=(0, 1, 2, 3),
-        frozen_stages=1,
-        init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50'),
-        style='pytorch'),
+        init_cfg=dict(
+            type='Pretrained',
+            checkpoint=pretrained,
+            prefix='backbone.'),
+        # type='ResNet',
+        # depth=50,
+        # num_stages=4,
+        # out_indices=(0, 1, 2, 3),
+        # frozen_stages=1,
+        # init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50'),
+        ),
     neck=dict(
         type='FPN',
-        in_channels=[256, 512, 1024, 2048],
+        in_channels=[48, 96, 192, 1280],
         out_channels=256,
         start_level=0,
         num_outs=5),
     mask_head=dict(
         type='SOLOV2Head',
-        num_classes=80,
+        num_classes=num_classes,
         in_channels=256,
         feat_channels=512,
         stacked_convs=4,
         strides=[8, 8, 16, 32, 32],
-        scale_ranges=((1, 96), (48, 192), (96, 384), (192, 768), (384, 2048)),
+        scale_ranges=((1, 48), (24, 96), (48, 192), (96, 224), (192, 224)),
+        #scale_ranges=((1, 96), (48, 192), (96, 384), (192, 768), (384, 2048)),
         pos_scale=0.2,
         num_grids=[40, 36, 24, 16, 12],
         cls_down_index=0,
@@ -92,13 +103,37 @@ model = dict(
 optim_wrapper = dict(
     optimizer=dict(lr=0.01), clip_grad=dict(max_norm=35, norm_type=2))
 
-
+train_pipeline = [
+    dict(type='LoadImageFromFile', backend_args=None, _scope_='mmdet'),
+    dict(
+        type='LoadAnnotations',
+        with_bbox=True,
+        with_mask=True,
+        _scope_='mmdet'),
+    dict(type='Resize', scale=(224, 224), keep_ratio=True, _scope_='mmdet'),
+    dict(type='RandomFlip', prob=0.5, _scope_='mmdet'),
+    dict(type='PackDetInputs', _scope_='mmdet')
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile', backend_args=None, _scope_='mmdet'),
+    dict(type='Resize', scale=(224, 224), keep_ratio=True, _scope_='mmdet'),
+    dict(
+        type='LoadAnnotations',
+        with_bbox=True,
+        with_mask=True,
+        _scope_='mmdet'),
+    dict(
+        type='PackDetInputs',
+        meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
+                   'scale_factor'),
+        _scope_='mmdet')
+]
 train_dataloader = dict(
     batch_size=train_batch_size_per_gpu,
     num_workers=train_num_workers,
     sampler=dict(type='InfiniteSampler'),
     dataset=dict(
-       
+        pipeline=train_pipeline,
         data_root=data_root,
         metainfo=metainfo,
         ann_file=train_ann_file,
@@ -108,6 +143,7 @@ val_dataloader = dict(
     batch_size=val_batch_size_per_gpu,
     num_workers=val_num_workers,
     dataset=dict(
+        pipeline=test_pipeline,
         metainfo=metainfo,
         data_root=data_root,
         ann_file=val_ann_file,
@@ -122,5 +158,10 @@ val_evaluator = dict(
     _scope_='mmdet')
 test_dataloader = val_dataloader
 test_evaluator = val_evaluator
-
+train_cfg = dict(max_epochs=36,val_interval=1)
+# train_cfg = dict(
+#     _delete_=True,
+#     type='IterBasedTrainLoop',
+#     max_iters=270000,
+#     val_interval=100)
 visualizer = dict(vis_backends = [dict(type='LocalVisBackend'), dict(type='WandbVisBackend')]) # noqa
