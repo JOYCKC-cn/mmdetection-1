@@ -80,10 +80,6 @@ model = dict(
             gamma=2.0,
             reduction='sum',
             loss_weight=2.0),
-        loss_bbox=dict(
-            type='GIoULoss',
-            reduction='mean',
-            loss_weight=3.0),
         loss_obj=dict(
             type='CrossEntropyLoss',
             use_sigmoid=True,
@@ -116,7 +112,7 @@ train_pipeline = [
         poly2mask=False),
     dict(
         type='RandomChoiceResize',
-        scales=[(224, 224),],
+        scales=[(224, 224),(224*1.5, 224*1.5),(224*1.8, 224*1.8)],
         keep_ratio=True,
         backend=backend),
     dict(type='RandomFlip', prob=0.5),
