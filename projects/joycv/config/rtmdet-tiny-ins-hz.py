@@ -21,7 +21,7 @@ num_classes = len(classes)
 print(f"num_classes:{num_classes}")
 metainfo = dict(classes=classes, )
 print(f"metainfo {metainfo}")
-
+load_from='https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet-ins_tiny_8xb32-300e_coco/rtmdet-ins_tiny_8xb32-300e_coco_20221130_151727-ec670f7e.pth'
 train_batch_size=8
 train_num_of_worker=10
 
@@ -61,27 +61,32 @@ val_dataloader = dict(
 test_dataloader=val_dataloader
 
 
-custom_hooks = [
-    dict(
-        type='PipelineSwitchHook',
-        switch_epoch=2,
-        switch_pipeline=[
-            dict(
-                type='RandomResize',
-                scale=(224, 224),
-                ),
-            dict(
-                type='RandomCrop',
-                crop_size=(224, 224),
-                ),
-            dict(
-                type='Pad', size=(224, 224),
-                pad_val=dict(img=(114, 114, 114))),
-        ],
-        )
-]
+# custom_hooks = [
+#     dict(
+#         type='PipelineSwitchHook',
+#         switch_epoch=2,
+#         switch_pipeline=[
+#             dict(
+#                 type='RandomResize',
+#                 scale=(640, 640),
+#                 ),
+#             dict(
+#                 type='RandomCrop',
+#                 crop_size=(640, 640),
+#                 ),
+#             dict(
+#                 type='Pad', size=(640, 640),
+#                 pad_val=dict(img=(114, 114, 114))),
+#         ],
+#         )
+# ]
 val_evaluator = dict(
     type='CocoMetric',
     ann_file=f'{data_root}{val_ann_file}')
 
 test_evaluator=val_evaluator
+default_hooks = dict(
+    checkpoint=dict(interval=10, max_keep_ckpts=3, save_best='auto'),
+    logger=dict(type='LoggerHook', interval=5))
+
+visualizer = dict(vis_backends = [dict(type='LocalVisBackend'), dict(type='WandbVisBackend')]) # noqa
