@@ -18,7 +18,7 @@ metainfo = {
 }
 
 # Batch size of a single GPU during training
-train_batch_size_per_gpu = 32
+train_batch_size_per_gpu = 8
 # Worker to pre-fetch data for each single GPU during training
 train_num_workers = 10
 # persistent_workers must be False if num_workers is 0.

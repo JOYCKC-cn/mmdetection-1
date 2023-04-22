@@ -22,7 +22,7 @@ val_data_prefix = 'valid/'  # Prefix of val image path
 
 classes=('crack','crack')
 
-train_batch_size_per_gpu = 24
+train_batch_size_per_gpu = 4
 train_num_workers = 4
 val_batch_size_per_gpu = 1
 val_num_workers = 2
@@ -112,7 +112,7 @@ train_pipeline = [
         poly2mask=False),
     dict(
         type='RandomChoiceResize',
-        scales=[(224, 224),(224*1.5, 224*1.5),(224*1.8, 224*1.8)],
+        scales=[(224*0.5, 224*0.5),(224*0.75, 224*0.75),(224, 224),(224*1.5, 224*1.5),(224*2, 224*2),(224*3, 224*3)],
         keep_ratio=True,
         backend=backend),
     dict(type='RandomFlip', prob=0.5),
@@ -188,5 +188,5 @@ log_processor = dict(by_epoch=False)
 # NOTE: `auto_scale_lr` is for automatically scaling LR,
 # USER SHOULD NOT CHANGE ITS VALUES.
 # base_batch_size = (8 GPUs) x (8 samples per GPU)
-auto_scale_lr = dict(base_batch_size=64, enable=True)
+auto_scale_lr = dict(base_batch_size=train_batch_size_per_gpu*2, enable=True)
 visualizer = dict(vis_backends = [dict(type='LocalVisBackend'), dict(type='WandbVisBackend')]) # noqa
