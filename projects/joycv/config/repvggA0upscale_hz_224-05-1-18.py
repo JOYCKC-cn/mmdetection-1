@@ -11,7 +11,7 @@ if platform.system() == 'Windows':
 elif platform.system() == 'Linux':                                                                                                                                                                                  
             data_root = '/opt/images/hz/'                                                                                                                                                                           
 else:                                                                                                                                                                                                               
-                raise NotImplementedError("Unsupported operating system")                                                                                                                                           
+    raise NotImplementedError("Unsupported operating system")                                                                                                                                           
        
 # Path of train annotation file
 train_ann_file = 'train/_annotations.coco.json'
