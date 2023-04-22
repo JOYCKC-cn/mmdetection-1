@@ -25,7 +25,7 @@ load_from='https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet-ins_tin
 train_batch_size=8
 train_num_of_worker=10
 
-val_batch_size=int(train_batch_size/8)
+val_batch_size=32
 val_num_of_worker=2
 
 model = dict(
@@ -46,11 +46,28 @@ train_dataloader = dict(
         ),
     )
 
+
+test_pipeline = [
+    dict(type='LoadImageFromFile', backend_args=None, _scope_='mmdet'),
+    dict(type='Resize', scale=(224, 224), keep_ratio=True, _scope_='mmdet'),
+    dict(
+        type='Pad',
+        size=(224, 224),
+        pad_val=dict(img=(114, 114, 114)),
+        _scope_='mmdet'),
+    dict(
+        type='PackDetInputs',
+        meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
+                   'scale_factor'),
+        _scope_='mmdet')
+]
+
 val_dataloader = dict(
     batch_size=val_batch_size,
     num_workers=val_num_of_worker,
     dataset=dict(
         type='CocoDataset',
+        pipeline=test_pipeline,
         metainfo=metainfo,
         data_root= data_root,
         ann_file=val_ann_file,
