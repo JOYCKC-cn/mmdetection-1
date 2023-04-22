@@ -78,32 +78,37 @@ val_dataloader = dict(
 test_dataloader=val_dataloader
 
 
-# custom_hooks = [
-#     dict(
-#         type='PipelineSwitchHook',
-#         switch_epoch=2,
-#         switch_pipeline=[
-#             dict(
-#                 type='RandomResize',
-#                 scale=(640, 640),
-#                 ),
-#             dict(
-#                 type='RandomCrop',
-#                 crop_size=(640, 640),
-#                 ),
-#             dict(
-#                 type='Pad', size=(640, 640),
-#                 pad_val=dict(img=(114, 114, 114))),
-#         ],
-#         )
-# ]
+custom_hooks = [
+    dict(
+        type='PipelineSwitchHook',
+        switch_epoch=3,
+        switch_pipeline=[
+            dict(
+                type='RandomResize',
+                scale=(640, 640),
+                ),
+            dict(
+                type='RandomCrop',
+                crop_size=(640, 640),
+                ),
+            dict(
+                type='Pad', size=(640, 640),
+                pad_val=dict(img=(114, 114, 114))),
+        ],
+        )
+]
 val_evaluator = dict(
     type='CocoMetric',
     ann_file=f'{data_root}{val_ann_file}')
 
 test_evaluator=val_evaluator
+
+custom_hooks = [dict(type='NumClassCheckHook')]
+
 default_hooks = dict(
+    visualization=dict(type='DetVisualizationHook', draw=True),
     checkpoint=dict(interval=10, max_keep_ckpts=3, save_best='auto'),
     logger=dict(type='LoggerHook', interval=5))
 
-visualizer = dict(vis_backends = [dict(type='LocalVisBackend'), dict(type='WandbVisBackend')]) # noqa
+visualizer = dict(dict(type='DetLocalVisualizer'),vis_backends = [dict(type='LocalVisBackend'),dict(type='TensorboardVisBackend'), dict(type='WandbVisBackend')]) # noqa
+
