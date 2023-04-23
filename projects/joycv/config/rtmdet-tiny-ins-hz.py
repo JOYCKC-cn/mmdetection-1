@@ -31,6 +31,8 @@ stage2_num_epochs=max_epoch-100
 val_batch_size=32
 val_num_of_worker=2
 
+stg2_train_size=224
+eval_size=224
 model = dict(
     bbox_head=dict(
         type='RTMDetInsSepBNHead',
@@ -52,10 +54,10 @@ train_dataloader = dict(
 
 test_pipeline = [
     dict(type='LoadImageFromFile', backend_args=None, _scope_='mmdet'),
-    dict(type='Resize', scale=(224, 224), keep_ratio=True, _scope_='mmdet'),
+    dict(type='Resize', scale=(eval_size, eval_size), keep_ratio=True, _scope_='mmdet'),
     dict(
         type='Pad',
-        size=(224, 224),
+        size=(eval_size, eval_size),
         pad_val=dict(img=(114, 114, 114)),
         _scope_='mmdet'),
     dict(
@@ -89,18 +91,18 @@ train_pipeline_stage2 = [
         poly2mask=False),
     dict(
         type='RandomResize',
-        scale=(224, 224),
+        scale=(stg2_train_size, stg2_train_size),
         ratio_range=(1, 1),
         keep_ratio=True),
     dict(
         type='RandomCrop',
-        crop_size=(224, 224),
+        crop_size=(stg2_train_size, stg2_train_size),
         recompute_bbox=True,
         allow_negative_crop=True),
     dict(type='FilterAnnotations', min_gt_bbox_wh=(1, 1)),
     dict(type='YOLOXHSVRandomAug'),
     dict(type='RandomFlip', prob=0.5),
-    dict(type='Pad', size=(224, 224), pad_val=dict(img=(114, 114, 114))),
+    dict(type='Pad', size=(stg2_train_size, stg2_train_size), pad_val=dict(img=(114, 114, 114))),
     dict(type='PackDetInputs')
 ]
 custom_hooks = [
@@ -113,6 +115,7 @@ custom_hooks = [
 ]
 val_evaluator = dict(
     type='CocoMetric',
+    metric=['segm'],
     ann_file=f'{data_root}{val_ann_file}')
 
 test_evaluator=val_evaluator
@@ -131,12 +134,15 @@ default_hooks = dict(
     )
 import platform
 wandb_name=data_root.split("/")[-1]
+if(wandb_name==""):
+    wandb_name=data_root.split("/")[-2]
+wandb_name=f"dataset{wandb_name}-trainbsz{train_batch_size}-maxe{max_epoch}-stg2{stage2_num_epochs}-imgscl{stg2_train_size}-evlmetric_segm-{platform.node()}"
 visualizer = dict(
     dict(type='DetLocalVisualizer'),
     vis_backends = [
         dict(type='LocalVisBackend'),
         dict(type='TensorboardVisBackend'), 
         dict(type='WandbVisBackend',
-        init_kwargs={'project': f'rtmdet-tiny-{platform.node()}','name':f"{wandb_name}"},)
+        init_kwargs={'project': f'rtmdet-tiny-','name':f"{wandb_name}"},)
     ]) # noqa
 
