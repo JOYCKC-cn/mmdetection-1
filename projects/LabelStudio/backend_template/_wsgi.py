@@ -103,6 +103,7 @@ if __name__ == '__main__':
 
     def parse_kwargs():
         param = dict()
+        print(args.kwargs)
         for k, v in args.kwargs:
             if v.isdigit():
                 param[k] = int(v)
