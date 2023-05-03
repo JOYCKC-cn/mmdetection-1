@@ -5,7 +5,7 @@ import platform,os
 if platform.system() == 'Windows':                                                                                                                                                                                  
         data_root = 'B:/opt/hz/'                                                                                                                                                                                    
 elif platform.system() == 'Linux':                                                                                                                                                                                  
-        data_root = './data/unziped_path/DatasetId_1824199_1682959442/'                                                                                                                                                                           
+        data_root = './data/20230503_165128/DatasetId_1824199_1683103431/'                                                                                                                                                                           
 else:                                                                                                                                                                                                               
     raise NotImplementedError("Unsupported operating system")                                                                                                                                           
        
@@ -35,13 +35,13 @@ metainfo = dict(classes=classes, )
 print(f"metainfo {metainfo}")
 load_from='https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet-ins_tiny_8xb32-300e_coco/rtmdet-ins_tiny_8xb32-300e_coco_20221130_151727-ec670f7e.pth'
 train_batch_size=4
-train_num_of_worker=10
+train_num_of_worker=4
 
-max_epoch=3000
+max_epoch=600
 stage2_num_epochs=max_epoch-100
 
 val_batch_size=4
-val_num_of_worker=2
+val_num_of_worker=4
 
 stg1_train_size_factor_width=640
 stg1_train_size_factor_height=640
@@ -49,7 +49,7 @@ stg2_train_size_width=stg1_train_size_factor_width
 stg2_train_size_height=stg1_train_size_factor_height
 eval_size_width=stg1_train_size_factor_width
 eval_size_height=stg1_train_size_factor_height
-train_scale_factor=1
+train_scale_factor=2
 
 model = dict(
     bbox_head=dict(
