@@ -5,7 +5,8 @@ import platform,os
 if platform.system() == 'Windows':                                                                                                                                                                                  
         data_root = 'B:/opt/hz/'                                                                                                                                                                                    
 elif platform.system() == 'Linux':                                                                                                                                                                                  
-        data_root = './data/20230503_165128/DatasetId_1824199_1683103431/'                                                                                                                                                                           
+        data_root = './data/20230503_165128/DatasetId_1824199_1683103431/'   #2 cat, double, date
+        data_root = './data/20230504_073239/DatasetId_1824199_1683134856/'  #1 cat, single                                                                                                                                                                      
 else:                                                                                                                                                                                                               
     raise NotImplementedError("Unsupported operating system")                                                                                                                                           
        
@@ -49,7 +50,7 @@ stg2_train_size_width=stg1_train_size_factor_width
 stg2_train_size_height=stg1_train_size_factor_height
 eval_size_width=stg1_train_size_factor_width
 eval_size_height=stg1_train_size_factor_height
-train_scale_factor=2
+train_scale_factor=3
 
 model = dict(
     bbox_head=dict(
@@ -164,14 +165,14 @@ train_pipeline_stage2 = [
     dict(type='Pad', size=(stg2_train_size_width, stg2_train_size_height), pad_val=dict(img=(114, 114, 114))),
     dict(type='PackDetInputs')
 ]
-custom_hooks = [
-    dict(
-        type='PipelineSwitchHook',
-        switch_epoch=stage2_num_epochs,
-        switch_pipeline=train_pipeline_stage2,
-        ),
-    dict(type='NumClassCheckHook')    
-]
+# custom_hooks = [
+#     dict(
+#         type='PipelineSwitchHook',
+#         switch_epoch=stage2_num_epochs,
+#         switch_pipeline=train_pipeline_stage2,
+#         ),
+#     dict(type='NumClassCheckHook')    
+# ]
 val_evaluator = dict(
     type='CocoMetric',
     metric=['segm'],
