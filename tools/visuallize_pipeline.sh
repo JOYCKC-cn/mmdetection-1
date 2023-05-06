@@ -1,1 +1,1 @@
-python tools/analysis_tools/browse_dataset.py projects/joycv/config/rtmdet-tiny-ins-hz.py --output-dir work_dirs/pipline_vis 
+python tools/analysis_tools/browse_dataset.py projects/joycv/config/rtmdet-tiny-ins-fullsize_single_cat.py --output-dir work_dirs/pipline_vis 

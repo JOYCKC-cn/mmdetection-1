@@ -84,7 +84,7 @@ class DetLocalVisualizer(Visualizer):
                                             Tuple[int]]] = (200, 200, 200),
                  mask_color: Optional[Union[str, Tuple[int]]] = None,
                  line_width: Union[int, float] = 3,
-                 alpha: float = 0.8) -> None:
+                 alpha: float = 0.2) -> None:
         super().__init__(
             name=name,
             image=image,

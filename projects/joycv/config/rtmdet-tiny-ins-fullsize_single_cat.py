@@ -6,7 +6,8 @@ if platform.system() == 'Windows':
         data_root = 'B:/opt/hz/'                                                                                                                                                                                    
 elif platform.system() == 'Linux':                                                                                                                                                                                  
         data_root = './data/20230503_165128/DatasetId_1824199_1683103431/'   #2 cat, double, date
-        data_root = './data/20230504_073239/DatasetId_1824199_1683134856/'  #1 cat, single                                                                                                                                                                      
+        data_root = './data/20230504_073239/DatasetId_1824199_1683134856/'  #1 cat, single  
+        data_root = './data/20230504_144459/DatasetId_1824199_1683174528/'                                                                                                                                                                    
 else:                                                                                                                                                                                                               
     raise NotImplementedError("Unsupported operating system")                                                                                                                                           
        
@@ -140,7 +141,18 @@ val_dataloader = dict(
         ),
     )
 
-test_dataloader=val_dataloader
+test_dataloader = dict(
+    batch_size=val_batch_size,
+    num_workers=val_num_of_worker,
+    dataset=dict(
+        type='CocoDataset',
+        pipeline=test_pipeline,
+        metainfo=metainfo,
+        data_root= "/nas/ai_image/sync_image/baidu_pan_download/栗子/鲜栗子/2022-08-03_16-57-58_0806[freshchestnut_raw]/",
+        #ann_file=val_ann_file,
+        data_prefix=dict(img="/"),
+        ),
+    )
 
 train_pipeline_stage2 = [
     dict(type='LoadImageFromFile', backend_args={{_base_.backend_args}}),
