@@ -7,7 +7,7 @@ from pycocotools import mask
 import pycocotools.mask as coco_mask
 from zebra_polygon_threshold import create_mask
 
-input_img="/opt/workspace/imagedb/slice/palm_date_slice/zebra/20231424-001452/sliced_image/46609-21-11-07 19-17-31-072_0_sliced_image_r3_c4.jpg"
+input_img="/nas/ai_image/sync_image/baidu_pan_download/栗子/鲜栗子/2022-08-03_16-57-58_0806[freshchestnut_raw]/column[6-11]-middle-0000686-2022-08-03_17-23-47_6355.bmp"
 I=cv2.imread(input_img)
 # I = np.ones((3, 3, 3), dtype=np.uint8) * 255
 

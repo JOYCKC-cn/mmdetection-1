@@ -55,7 +55,7 @@ def process_images(input_dir, output_dir):
         cv2.imwrite(output_image_path, hconcat_image)
 
 if __name__ == "__main__":
-    input_dir = "/opt/workspace/imagedb/slice/20231030-151036/dry_first_batch/"
-    output_dir = "/opt/workspace/imagedb/slice/20231030-151036/dry_first_batch_debug/"
+    input_dir = "/opt/workspace/imagedb/train_cls_old_collection/deform_score_sample/"
+    output_dir = "/opt/images/deform_score/"
     process_images(input_dir, output_dir)
 

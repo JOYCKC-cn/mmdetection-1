@@ -103,7 +103,7 @@ def main():
     #  We will be optimized later.
     inferencer = DetInferencer(**init_args)
     inferencer(**call_args)
-
+    
     if call_args['out_dir'] != '' and not (call_args['no_save_vis']
                                            and call_args['no_save_pred']):
         print_log(f'results have been saved at {call_args["out_dir"]}')

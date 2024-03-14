@@ -5,7 +5,7 @@ import platform,os
 if platform.system() == 'Windows':                                                                                                                                                                                  
         data_root = 'B:/opt/hz/'                                                                                                                                                                                    
 elif platform.system() == 'Linux':                                                                                                                                                                                  
-        data_root = './data/unziped_path/DatasetId_1824199_1682959442/'                                                                                                                                                                      
+        data_root = './data/20230511_181415/DatasetId_1822463_1682699165/'                                                                                                                                                                      
 else:                                                                                                                                                                                                               
     raise NotImplementedError("Unsupported operating system")                                                                                                                                           
        
@@ -36,7 +36,7 @@ print(f"num_classes:{num_classes}")
 metainfo = dict(classes=classes, )
 print(f"metainfo {metainfo}")
 #load_from='https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet-ins_tiny_8xb32-300e_coco/rtmdet-ins_tiny_8xb32-300e_coco_20221130_151727-ec670f7e.pth'
-train_batch_size=16
+train_batch_size=32
 train_num_of_worker=10
 
 max_epoch=3000
@@ -49,77 +49,86 @@ stg1_train_size_factor=224
 stg2_train_size=224
 eval_size=224
 train_scale_factor=3
-
+bbox_scale_factor=1
 model = dict(
     bbox_head=dict(
         type='RTMDetSepBNHead',
+        anchor_generator=dict(
+        type='MlvlPointGenerator', offset=0, strides=[8*bbox_scale_factor, 16*bbox_scale_factor, 32*bbox_scale_factor] ),
+        bbox_coder=dict(type='DistancePointBBoxCoder', base_sizes=[8*bbox_scale_factor, 16*bbox_scale_factor, 32*bbox_scale_factor] ),
         num_classes=num_classes)
 )
 
 
-# train_pipeline = [
-#     dict(type='LoadImageFromFile', backend_args=None, _scope_='mmdet'),
-#     dict(
-#         type='LoadAnnotations',
-#         with_bbox=True,
-#         with_mask=True,
-#         poly2mask=False,
-#         _scope_='mmdet'),
-#     dict(
-#         type='CachedMosaic',
-#         img_scale=(stg1_train_size_factor*train_scale_factor, stg1_train_size_factor*train_scale_factor),
-#         pad_val=114.0,
-#         max_cached_images=20,
-#         random_pop=False,
-#         _scope_='mmdet'),
-#     dict(
-#         type='RandomResize',
-#         scale=(stg1_train_size_factor*train_scale_factor, stg1_train_size_factor*train_scale_factor),
-#         ratio_range=(0.5, 2.0),
-#         keep_ratio=True,
-#         _scope_='mmdet'),
-#     dict(type='RandomCrop', crop_size=(stg1_train_size_factor, stg1_train_size_factor), _scope_='mmdet'),
-#     dict(type='YOLOXHSVRandomAug', _scope_='mmdet'),
-#     dict(type='RandomFlip', prob=0.5, _scope_='mmdet'),
-#     dict(
-#         type='Pad',
-#         size=(stg1_train_size_factor, stg1_train_size_factor),
-#         pad_val=dict(img=(114, 114, 114)),
-#         _scope_='mmdet'),
-#     dict(
-#         type='CachedMixUp',
-#         img_scale=(stg1_train_size_factor, stg1_train_size_factor),
-#         ratio_range=(1.0, 1.0),
-#         max_cached_images=10,
-#         random_pop=False,
-#         pad_val=(114, 114, 114),
-#         prob=0.5,
-#         _scope_='mmdet'),
-#     dict(type='FilterAnnotations', min_gt_bbox_wh=(1, 1), _scope_='mmdet'),
-#     dict(type='PackDetInputs', _scope_='mmdet')
-# ]
+train_pipeline = [
+    dict(type='LoadImageFromFile', backend_args=None, _scope_='mmdet'),
+    dict(
+        type='LoadAnnotations',
+        with_bbox=True,
+        with_mask=False,
+        poly2mask=False,
+        _scope_='mmdet'),
+    dict(
+        type='CachedMosaic',
+        img_scale=(stg1_train_size_factor*train_scale_factor, stg1_train_size_factor*train_scale_factor),
+        pad_val=114.0,
+        max_cached_images=20,
+        random_pop=False,
+        _scope_='mmdet'),
+    dict(
+        type='RandomResize',
+        scale=(stg1_train_size_factor*train_scale_factor, stg1_train_size_factor*train_scale_factor),
+        ratio_range=(0.5, 2.0),
+        keep_ratio=True,
+        _scope_='mmdet'),
+    dict(type='RandomCrop', crop_size=(stg1_train_size_factor, stg1_train_size_factor), _scope_='mmdet'),
+    dict(type='YOLOXHSVRandomAug', _scope_='mmdet'),
+    dict(type='RandomFlip', prob=0.5, _scope_='mmdet'),
+    dict(
+        type='Pad',
+        size=(stg1_train_size_factor, stg1_train_size_factor),
+        pad_val=dict(img=(114, 114, 114)),
+        _scope_='mmdet'),
+    dict(
+        type='CachedMixUp',
+        img_scale=(stg1_train_size_factor, stg1_train_size_factor),
+        ratio_range=(1.0, 1.0),
+        max_cached_images=10,
+        random_pop=False,
+        pad_val=(114, 114, 114),
+        prob=0.5,
+        _scope_='mmdet'),
+    dict(type='FilterAnnotations', min_gt_bbox_wh=(1, 1), _scope_='mmdet'),
+    dict(type='PackDetInputs', _scope_='mmdet')
+]
 
-# test_pipeline = [
-#     dict(type='LoadImageFromFile', backend_args=None, _scope_='mmdet'),
-#     dict(type='Resize', scale=(eval_size, eval_size), keep_ratio=True, _scope_='mmdet'),
-#     dict(
-#         type='Pad',
-#         size=(eval_size, eval_size),
-#         pad_val=dict(img=(114, 114, 114)),
-#         _scope_='mmdet'),
-#     dict(
-#         type='PackDetInputs',
-#         meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
-#                    'scale_factor'),
-#         _scope_='mmdet')
-# ]
+test_pipeline = [
+    dict(type='LoadImageFromFile', backend_args=None, _scope_='mmdet'),
+    dict(
+        type='LoadAnnotations',
+        with_bbox=True,
+        with_mask=False,
+        poly2mask=False,
+        _scope_='mmdet'),
+    dict(type='Resize', scale=(eval_size, eval_size), keep_ratio=True, _scope_='mmdet'),
+    dict(
+        type='Pad',
+        size=(eval_size, eval_size),
+        pad_val=dict(img=(114, 114, 114)),
+        _scope_='mmdet'),
+    dict(
+        type='PackDetInputs',
+        meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
+                   'scale_factor'),
+        _scope_='mmdet')
+]
 train_dataloader = dict(
     batch_size=train_batch_size,
     num_workers=train_num_of_worker,
     dataset=dict(
         type='CocoDataset',
         metainfo=metainfo,
-        #pipeline=train_pipeline,
+        pipeline=train_pipeline,
         data_root= data_root,
         ann_file=train_ann_file,
         data_prefix=dict(img=train_data_prefix),
@@ -130,7 +139,7 @@ val_dataloader = dict(
     num_workers=val_num_of_worker,
     dataset=dict(
         type='CocoDataset',
-        #pipeline=test_pipeline,
+        pipeline=test_pipeline,
         metainfo=metainfo,
         data_root= data_root,
         ann_file=val_ann_file,
@@ -145,7 +154,7 @@ test_dataloader=val_dataloader
 #     dict(
 #         type='LoadAnnotations',
 #         with_bbox=True,
-#         with_mask=True,
+#         with_mask=False,
 #         poly2mask=False),
 #     dict(
 #         type='RandomResize',
@@ -178,13 +187,13 @@ val_evaluator = dict(
 
 test_evaluator=val_evaluator
 
-# train_cfg = dict(
-#     type='EpochBasedTrainLoop',
-#     max_epochs=max_epoch,
+train_cfg = dict(
+    type='EpochBasedTrainLoop',
+    max_epochs=max_epoch,
     
-#     val_interval=10,
-#     dynamic_intervals=[(stage2_num_epochs, 1)],
-#     _scope_='mmdet')
+    val_interval=10,
+    dynamic_intervals=[(stage2_num_epochs, 1)],
+    _scope_='mmdet')
 
 default_hooks = dict(
     visualization=dict(type='DetVisualizationHook', draw=True),
@@ -196,7 +205,7 @@ wandb_name=data_root.split("/")[-1]
 if(wandb_name==""):
     wandb_name=data_root.split("/")[-2]
 wandb_name=f"dataset{wandb_name}-batchsize_{train_batch_size}-maxep_{max_epoch}-stg2_{stage2_num_epochs}-train_scale_factor_{train_scale_factor}-imgscl_{stg2_train_size}-evl_{val_evaluator['metric']}-{platform.node()}"
-visualizer = dict(
+/opt/workspace/playgroundvisualizer = dict(
     dict(type='DetLocalVisualizer'),
     vis_backends = [
         dict(type='LocalVisBackend'),

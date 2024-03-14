@@ -97,6 +97,6 @@ def process_images(input_dir, output_dir):
 
 
 if __name__ == "__main__":
-    input_dir = "/opt/workspace/imagedb/slice/20232828-002812-full-dry/samples/"
-    output_dir = "/opt/workspace/imagedb/slice/20232828-002812-full-dry/samples_debug/"
+    input_dir = "/opt/workspace/imagedb/train_cls_old_collection/deform_score_sample/"
+    output_dir = "/opt/images/deform_score/"
     process_images(input_dir, output_dir)

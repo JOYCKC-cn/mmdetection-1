@@ -8,8 +8,8 @@ import pycocotools.mask as coco_mask
 import pycocotools.mask as mask_utils
 from coco_tool.generate_coco_annoation import binary_mask_to_coco_annotation
 from zebra_polygon_threshold import create_mask
-input_folder = "/opt/workspace/imagedb/slice/palm_date_slice/zebra/clear_zebra/"
-output_folder = "/opt/workspace/imagedb/slice/palm_date_slice/zebra/clear_zebra_output/"
+input_folder = "/nas/ai_image/sync_image/baidu_pan_download/栗子/鲜栗子/2022-08-03_16-57-58_0806[freshchestnut_raw]/"
+output_folder = "/nas/ai_image/sync_image/baidu_pan_download/栗子/鲜栗子/marked"
 
 # Create the output folder if it doesn't exist
 if not os.path.exists(output_folder):
@@ -31,7 +31,7 @@ def encode_binary_mask(mask):
     rle['counts'] = rle['counts'].decode('utf-8')
     return rle
 for filename in os.listdir(input_folder):
-    if filename.endswith(".jpg") or filename.endswith(".png"):
+    if filename.endswith(".jpg") or filename.endswith(".bmp"):
         # Read the image
         image = cv2.imread(os.path.join(input_folder, filename))
         height, width, _ = image.shape
@@ -44,7 +44,7 @@ for filename in os.listdir(input_folder):
         # upper_threshold = np.array([int(94.115 * 255 / 100), int(26.997 + 128), int(18.403 + 128)], dtype="uint8")
         # binary_mask = cv2.inRange(lab_image, lower_threshold, upper_threshold)
         binary_mask, debug_mask= create_mask(image)
-        
+        print(f"saving debug image")
         # Save the output image
         cv2.imwrite(os.path.join(f"{output_folder}/Debug/", filename), debug_mask)
         cv2.imwrite(os.path.join(f"{output_folder}/Images/", filename), image)

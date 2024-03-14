@@ -7,7 +7,8 @@ if platform.system() == 'Windows':
 elif platform.system() == 'Linux':                                                                                                                                                                                  
         data_root = './data/20230503_165128/DatasetId_1824199_1683103431/'   #2 cat, double, date
         data_root = './data/20230504_073239/DatasetId_1824199_1683134856/'  #1 cat, single  
-        data_root = './data/20230504_144459/DatasetId_1824199_1683174528/'                                                                                                                                                                    
+        data_root = './data/20230504_144459/DatasetId_1824199_1683174528/'      
+        data_root = './data/20230526_144519/DatasetId_1824199_1685080582/'                                                                                                                                                              
 else:                                                                                                                                                                                                               
     raise NotImplementedError("Unsupported operating system")                                                                                                                                           
        

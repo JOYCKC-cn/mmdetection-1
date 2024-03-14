@@ -1,46 +1,82 @@
-import os
 import cv2
+import sys
+import os
 import numpy as np
-# Path to the input image folder
-input_folder = "/opt/workspace/imagedb/slice/palm_date_slice/zebra/20231424-001452/sliced_image"
+from datetime import datetime
+from PIL import Image, ImageDraw, ImageFont
 
-# Path to the output image folder
-output_folder = os.path.dirname(input_folder) 
 
-# Size of each input image
-img_size = (224, 224)
+def read_and_resize_image(image_path, original_size, index):
+    image = cv2.imread(image_path)
+    if image.shape[:2] != original_size:
+        image = cv2.resize(image, original_size)
 
-# Number of rows and columns in the output grid
-num_rows = 10
-num_cols = 10
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 0.8
+    font_thickness = 2
+    text = str(index)
+    text_size = cv2.getTextSize(text, font, font_scale, font_thickness)[0]
+    text_x = (original_size[0] - text_size[0]) // 2
+    text_y = text_size[1] + 10
 
-# Get a list of all image filenames in the input folder
-image_filenames = os.listdir(input_folder)
+    cv2.putText(image, text, (text_x, text_y), font, font_scale, (0, 255, 255), font_thickness)
+    return image
 
-# Sort the filenames alphabetically to ensure consistent ordering
-image_filenames.sort()
+def create_concatenated_image(image_list, grid_size_w, grid_size_h, original_size, output_name):
+    result_image = np.zeros((grid_size_h * original_size[0], grid_size_w * original_size[1], 3), np.uint8)
+    for i in range(grid_size_h):
+        for j in range(grid_size_w):
+            index = i * grid_size_w + j
+            if index < len(image_list):
+                image = read_and_resize_image(image_list[index], original_size, index)
+            else:
+                image = np.ones((*original_size[::-1], 3), np.uint8) * 255
+            result_image[i * original_size[0]: (i+1) * original_size[0], j * original_size[1]: (j+1) * original_size[1]] = image
 
-# Create an empty output grid image
-output_grid = np.zeros((img_size[0]*num_rows, img_size[1]*num_cols, 3), dtype=np.uint8)
+    result_image_pil = Image.fromarray(cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB))
+    draw = ImageDraw.Draw(result_image_pil)
 
-# Loop over the first 25 images and add them to the output grid
-for i, filename in enumerate(image_filenames[:num_rows*num_cols]):
-    # Load the image
-    img = cv2.imread(os.path.join(input_folder, filename))
+    # Load a font that supports Chinese characters (e.g., simhei.ttf)
+    font = ImageFont.truetype("NotoSansSC-Light.otf", 30)
+    text = output_name.split('.')[0]
+    text_size = draw.textsize(text, font=font)
+    text_x = (result_image.shape[1] - text_size[0]) // 2
+    text_y = result_image.shape[0] - text_size[1] - 10
 
-    # Resize the image to the desired size
-    img = cv2.resize(img, img_size)
+    draw.text((text_x, text_y), text, font=font, fill=(255, 255, 0))
+    result_image = cv2.cvtColor(np.array(result_image_pil), cv2.COLOR_RGB2BGR)
+    return result_image
 
-    # Calculate the row and column indices in the output grid
-    row_idx = i // num_cols
-    col_idx = i % num_cols
 
-    # Compute the coordinates of the top-left corner of the image in the output grid
-    top = row_idx * img_size[0]
-    left = col_idx * img_size[1]
 
-    # Copy the image to the output grid
-    output_grid[top:top+img_size[0], left:left+img_size[1], :] = img
 
-# Save the output grid image to the output folder
-cv2.imwrite(os.path.join(output_folder, "output.jpg"), output_grid)
+def main(input_path, grid_size):
+    image_list = [os.path.join(input_path, img) for img in os.listdir(input_path) if img.endswith(('.png', '.jpg', '.jpeg'))][:grid_size * grid_size]
+    image_list = sorted(image_list)
+
+    if not image_list:
+        print("No image files found in the input directory.")
+        return
+
+    original_image_size = cv2.imread(image_list[0]).shape[:2]
+
+    
+
+    output_folder_name = os.path.basename(os.path.normpath(input_path))
+    output_path_dirname = os.path.dirname(os.path.normpath(input_path))
+    output_filename = f"{output_folder_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+    output_path = os.path.join(output_path_dirname, output_filename)
+    concatenated_image = create_concatenated_image(image_list,8,8, original_image_size,output_folder_name)
+    cv2.imwrite(output_path, concatenated_image)
+    print(f"Concatenated image saved at: {output_path}")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print(f"Usage: python {__file__} <input_path> <grid_size>")
+        sys.exit(1)
+    
+    input_path = sys.argv[1]
+    grid_size = int(sys.argv[2])
+
+    print(f"starting processing with input_path:{input_path} ")
+    main(input_path, grid_size)

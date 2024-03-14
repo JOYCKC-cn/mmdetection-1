@@ -17,8 +17,8 @@ usage() {
 }
 
 # Set default values for config and weights
-CONFIG_PATH="/opt/workspace/mmdetection-1/work_dirs/rtmdet-tiny-ins-fullsize_single_cat/rtmdet-tiny-ins-fullsize_single_cat.py"
-WEIGHTS="/opt/workspace/mmdetection-1/work_dirs/rtmdet-tiny-ins-fullsize_single_cat/best_coco_segm_mAP_epoch_70.pth"
+CONFIG_PATH="/opt/workspace/mmdetection-1/work_dirs/rtmdet-tiny-palmdat_ajwa/rtmdet-tiny-palmdat_ajwa.py"
+WEIGHTS="/opt/workspace/mmdetection-1/work_dirs/rtmdet-tiny-palmdat_ajwa/best_coco_bbox_mAP_epoch_250.pth"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]
@@ -55,10 +55,13 @@ fi
 
 # Decode image path
 DECODED_IMAGE_PATH=$(urldecode "$IMAGE_PATH")
+FOLDER_NAME=$(basename "$DECODED_IMAGE_PATH")
 
-# Create output directory with datetime
-OUT_DIR="./work_dirs/inference_test/$(date +%Y-%m-%d_%H-%M-%S)"
+# Create output directory with datetime and prefix
+OUT_DIR="./work_dirs/inference_test/${FOLDER_NAME}_$(date +%Y-%m-%d_%H-%M-%S)"
+
 mkdir -p "$OUT_DIR"
+
 
 # Run Python script with the parsed and default parameters
 python demo/image_demo.py \
