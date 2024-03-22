@@ -8,7 +8,7 @@ elif platform.system() == 'Linux':
         data_root = './data/20230503_165128/DatasetId_1824199_1683103431/'   #2 cat, double, date
         data_root = './data/20230504_073239/DatasetId_1824199_1683134856/'  #1 cat, single  
         data_root = './data/20230504_144459/DatasetId_1824199_1683174528/'      
-        data_root = './data/20230526_144519/DatasetId_1824199_1685080582/'                                                                                                                                                              
+        data_root = '/opt/image_store1/pd_detect_mask_dataset/20240321_073750/2030659_1710858042/'                                                                                                                                                              
 else:                                                                                                                                                                                                               
     raise NotImplementedError("Unsupported operating system")                                                                                                                                           
        

@@ -5,7 +5,7 @@ if [ $# -eq 0 ]; then
   echo "Usage: ./script.sh <download_source> [split_ratio]"
   exit 1
 fi
-
+data_root_path="/opt/image_store1/pd_detect_mask_dataset/"
 # Assign the arguments to variables
 download_source=$1
 split_ratio=${2:-0.8}  # Default value is 0.8 if split_ratio is not provided
@@ -24,8 +24,10 @@ find_path="Dataset*"
 unziped_path=$(ls "$datetime")
 echo $unziped_path
 echo "$datetime/$unziped_path/Annotations/coco_info.json"
+mv "$datetime/$unziped_path" "$data_root_path"
+
 # Run the Python command with the split_ratio and unziped_path
-python cocosplit.py --having-annotations --multi-class -s "$split_ratio" "$datetime/$unziped_path/Annotations/coco_info.json" "$datetime/$unziped_path/Annotations/train.json" "$datetime/$unziped_path/Annotations/test.json"
+python tools/cocosplit.py --having-annotations --multi-class -s "$split_ratio" "$data_root_path/$datetime/$unziped_path/Annotations/coco_info.json" "$data_root_path/$datetime/$unziped_path/Annotations/train.json" "$data_root_path/$datetime/$unziped_path/Annotations/test.json"
 echo $(ls "$datetime/$unziped_path/Annotations/")
 # Remove the temp file
 rm "$temp_file"
